@@ -1,0 +1,133 @@
+.activity-list h2 {
+  color: white;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.activity-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 3px solid transparent;
+}
+
+.activity-card.active {
+  border-color: #667eea;
+  box-shadow: 0 5px 25px rgba(102, 126, 234, 0.3);
+}
+
+.activity-card.voting {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+}
+
+.activity-card.completed {
+  background: linear-gradient(135deg, #f0fff4 0%, #e6ffed 100%);
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.activity-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.voting {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.activity-description {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.activity-result {
+  background: #e7f3ff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.result-header {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #0066cc;
+  margin-bottom: 1rem;
+}
+
+.votes-details {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #b3d9ff;
+}
+
+.votes-details h4 {
+  margin: 0 0 0.75rem 0;
+  color: #004d99;
+  font-size: 1rem;
+}
+
+.votes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.vote-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #b3d9ff;
+}
+
+.vote-user {
+  color: #333;
+  font-weight: 500;
+}
+
+.vote-value {
+  color: #0066cc;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.activity-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.activity-actions .btn {
+  flex: 1;
+  min-width: 120px;
+}
+

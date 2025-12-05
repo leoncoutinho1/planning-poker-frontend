@@ -1,0 +1,84 @@
+.voting-area {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+  border: 3px solid #667eea;
+}
+
+.voting-area h2 {
+  color: #333;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.voting-activity {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.voting-activity h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.voting-activity p {
+  color: #666;
+  margin: 0;
+}
+
+.voting-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.vote-card {
+  aspect-ratio: 1;
+  border: 3px solid #667eea;
+  border-radius: 12px;
+  background: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #667eea;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vote-card:hover:not(.disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  background: #667eea;
+  color: white;
+}
+
+.vote-card.selected {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+}
+
+.vote-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vote-confirmation {
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.voting-status {
+  text-align: center;
+  color: #666;
+  font-weight: 600;
+}
+
