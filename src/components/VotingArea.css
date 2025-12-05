@@ -1,40 +1,49 @@
-.voting-area {
-  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
-  border: 3px solid #667eea;
-}
-
-.voting-area h2 {
-  color: #333;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-.voting-activity {
+.voting-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  border-top: 3px solid #667eea;
 }
 
-.voting-activity h3 {
-  color: #333;
-  margin-bottom: 0.5rem;
+.voting-activity-info {
+  text-align: center;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
-.voting-activity p {
-  color: #666;
+.voting-activity-info h3 {
   margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.vote-confirmation-badge {
+  background: #d4edda;
+  color: #155724;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .voting-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  display: flex;
+  justify-content: center;
   gap: 1rem;
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 
 .vote-card {
-  aspect-ratio: 1;
+  width: 70px;
+  height: 100px;
   border: 3px solid #667eea;
   border-radius: 12px;
   background: white;
@@ -48,7 +57,7 @@
   justify-content: center;
 }
 
-.vote-card:hover:not(.disabled) {
+.vote-card:hover:not(.disabled):not(.hidden) {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
   background: #667eea;
@@ -67,18 +76,27 @@
   cursor: not-allowed;
 }
 
-.vote-confirmation {
-  background: #d4edda;
-  color: #155724;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-  margin-bottom: 1rem;
+.vote-card.hidden {
+  display: none;
 }
 
-.voting-status {
-  text-align: center;
-  color: #666;
-  font-weight: 600;
-}
+@media (max-width: 768px) {
+  .voting-footer {
+    padding: 1rem;
+  }
 
+  .vote-card {
+    width: 60px;
+    height: 85px;
+    font-size: 1.25rem;
+  }
+
+  .voting-activity-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .voting-activity-info h3 {
+    font-size: 1rem;
+  }
+}

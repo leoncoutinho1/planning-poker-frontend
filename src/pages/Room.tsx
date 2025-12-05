@@ -19,6 +19,7 @@ function RoomPage() {
   const [userName, setUserName] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [socketError, setSocketError] = useState('');
+  const [votedUserIds, setVotedUserIds] = useState<Set<string>>(new Set());
 
   // Carregar userId e userName
   useEffect(() => {
@@ -129,6 +130,7 @@ function RoomPage() {
     };
 
     const handleVotingStarted = (data: { activityId: string; activity: any }) => {
+      setVotedUserIds(new Set()); // Reset votos quando nova votação inicia
       setRoom((prevRoom) => {
         if (!prevRoom) return prevRoom;
         return {
@@ -143,11 +145,27 @@ function RoomPage() {
       });
     };
 
+    // Rastrear votos recebidos
+    const handleVoteReceived = (data: {
+      activityId: string;
+      userId: string;
+      userName: string;
+      hasVoted: boolean;
+    }) => {
+      setRoom((prevRoom) => {
+        if (prevRoom && prevRoom.currentActivityId === data.activityId) {
+          setVotedUserIds((prev) => new Set([...prev, data.userId]));
+        }
+        return prevRoom;
+      });
+    };
+
     const handleResultsRevealed = (data: {
       activityId: string;
       result: number;
       votes: any[];
     }) => {
+      setVotedUserIds(new Set()); // Reset votos quando resultados são revelados
       setRoom((prevRoom) => {
         if (!prevRoom) return prevRoom;
         return {
@@ -189,6 +207,7 @@ function RoomPage() {
     socketService.onResultsRevealed(handleResultsRevealed);
     socketService.onActivityRemoved(handleActivityRemoved);
     socketService.onError(handleError);
+    socketService.onVoteReceived(handleVoteReceived);
 
     // Entrar na sala quando socket estiver pronto
     const handleConnect = () => {
@@ -211,6 +230,7 @@ function RoomPage() {
       socketService.off('results-revealed', handleResultsRevealed);
       socketService.off('activity-removed', handleActivityRemoved);
       socketService.off('error', handleError);
+      socketService.off('vote-received', handleVoteReceived);
       socket.off('connect', handleConnect);
       socketService.disconnect();
     };
@@ -262,15 +282,10 @@ function RoomPage() {
 
       <div className="room-content">
         <div className="room-main">
-          {currentActivity && currentActivity.status === 'voting' && (
-            <VotingArea
-              activity={currentActivity}
-              roomId={roomId!}
-              userId={userId}
-              isOwner={isOwner || false}
-            />
-          )}
+          <UserList users={room.users} votedUserIds={votedUserIds} />
+        </div>
 
+        <div className="room-sidebar">
           <ActivityList
             activities={room.activities}
             currentActivityId={room.currentActivityId}
@@ -288,11 +303,17 @@ function RoomPage() {
             </button>
           )}
         </div>
-
-        <div className="room-sidebar">
-          <UserList users={room.users} />
-        </div>
       </div>
+
+      <VotingArea
+        activity={currentActivity || null}
+        roomId={roomId!}
+        userId={userId}
+        isOwner={isOwner || false}
+        onVoteReceived={(userId) => {
+          setVotedUserIds((prev) => new Set([...prev, userId]));
+        }}
+      />
 
       {showCreateModal && (
         <CreateActivityModal

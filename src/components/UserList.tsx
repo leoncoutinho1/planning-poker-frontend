@@ -3,9 +3,10 @@ import './UserList.css';
 
 interface UserListProps {
   users: User[];
+  votedUserIds?: Set<string>;
 }
 
-function UserList({ users }: UserListProps) {
+function UserList({ users, votedUserIds = new Set() }: UserListProps) {
   return (
     <div className="card user-list">
       <h2>👥 Participantes</h2>
@@ -13,14 +14,18 @@ function UserList({ users }: UserListProps) {
         {users.length === 0 ? (
           <p className="no-users">Nenhum participante ainda</p>
         ) : (
-          users.map((user) => (
-            <div key={user.id} className="user-item">
-              <div className="user-avatar">
-                {user.name.charAt(0).toUpperCase()}
+          users.map((user) => {
+            const hasVoted = votedUserIds.has(user.id);
+            return (
+              <div key={user.id} className={`user-item ${hasVoted ? 'voted' : ''}`}>
+                <div className="user-avatar">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="user-name">{user.name}</span>
+                {hasVoted && <span className="vote-indicator">✓</span>}
               </div>
-              <span className="user-name">{user.name}</span>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
       <div className="user-count">

@@ -3,21 +3,24 @@ import { Activity } from '../types';
 import { socketService } from '../services/socket';
 import './VotingArea.css';
 
+const VOTING_CARDS = [1, 2, 3, 4, 5, 6, 7, 8];
+
 interface VotingAreaProps {
-  activity: Activity;
+  activity: Activity | null;
   roomId: string;
   userId: string;
   isOwner: boolean;
+  onVoteReceived?: (userId: string) => void;
 }
 
-const FIBONACCI_CARDS = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89, '?'];
-
-function VotingArea({ activity, roomId, userId, isOwner }: VotingAreaProps) {
-  const [selectedVote, setSelectedVote] = useState<number | string | null>(null);
+function VotingArea({ activity, roomId, userId, isOwner, onVoteReceived }: VotingAreaProps) {
+  const [selectedVote, setSelectedVote] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [votedUsers, setVotedUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    if (!activity) return;
+
     const handleVoteReceived = (data: {
       activityId: string;
       userId: string;
@@ -26,6 +29,9 @@ function VotingArea({ activity, roomId, userId, isOwner }: VotingAreaProps) {
     }) => {
       if (data.activityId === activity.id) {
         setVotedUsers((prev) => new Set([...prev, data.userId]));
+        if (onVoteReceived) {
+          onVoteReceived(data.userId);
+        }
       }
     };
 
@@ -34,57 +40,59 @@ function VotingArea({ activity, roomId, userId, isOwner }: VotingAreaProps) {
     return () => {
       socketService.off('vote-received', handleVoteReceived);
     };
-  }, [activity.id]);
+  }, [activity, onVoteReceived]);
 
-  const handleVote = (vote: number | string) => {
-    if (hasVoted) return;
+  // Reset quando a atividade muda
+  useEffect(() => {
+    if (activity && activity.status === 'voting') {
+      setSelectedVote(null);
+      setHasVoted(false);
+      setVotedUsers(new Set());
+    }
+  }, [activity?.id]);
+
+  const handleVote = (vote: number) => {
+    if (hasVoted || !activity) return;
 
     setSelectedVote(vote);
-    
-    if (typeof vote === 'number') {
-      socketService.vote(roomId, userId, activity.id, vote);
-      setHasVoted(true);
-      setVotedUsers((prev) => new Set([...prev, userId]));
+    socketService.vote(roomId, userId, activity.id, vote);
+    setHasVoted(true);
+    setVotedUsers((prev) => new Set([...prev, userId]));
+    if (onVoteReceived) {
+      onVoteReceived(userId);
     }
   };
 
-  return (
-    <div className="voting-area card">
-      <h2>🗳️ Votação em Andamento</h2>
-      <div className="voting-activity">
-        <h3>{activity.title}</h3>
-        {activity.description && <p>{activity.description}</p>}
-      </div>
+  const isVoting = activity && activity.status === 'voting';
 
+  return (
+    <div className="voting-footer">
+      <div className="voting-activity-info">
+        {isVoting && (
+          <>
+            <h3>{activity.title}</h3>
+            {hasVoted && (
+              <span className="vote-confirmation-badge">✅ Você votou!</span>
+            )}
+          </>
+        )}
+      </div>
       <div className="voting-cards">
-        {FIBONACCI_CARDS.map((card) => (
+        {VOTING_CARDS.map((card) => (
           <button
             key={card}
             className={`vote-card ${
               selectedVote === card ? 'selected' : ''
-            } ${hasVoted ? 'disabled' : ''}`}
+            } ${hasVoted ? 'disabled' : ''} ${!isVoting ? 'hidden' : ''}`}
             onClick={() => handleVote(card)}
-            disabled={hasVoted}
+            disabled={hasVoted || !isVoting}
           >
             {card}
           </button>
         ))}
-      </div>
-
-      {hasVoted && (
-        <div className="vote-confirmation">
-          <p>✅ Você votou! Aguardando outros participantes...</p>
-        </div>
-      )}
-
-      <div className="voting-status">
-        <p>
-          {votedUsers.size} participante(s) já votaram
-        </p>
       </div>
     </div>
   );
 }
 
 export default VotingArea;
-

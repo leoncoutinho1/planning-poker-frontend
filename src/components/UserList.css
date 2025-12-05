@@ -23,11 +23,21 @@
   padding: 0.75rem;
   background: #f8f9fa;
   border-radius: 8px;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
 }
 
 .user-item:hover {
   background: #e9ecef;
+}
+
+.user-item.voted {
+  background: #d4edda;
+  border-color: #28a745;
+}
+
+.user-item.voted:hover {
+  background: #c3e6cb;
 }
 
 .user-avatar {
@@ -46,6 +56,13 @@
 .user-name {
   color: #333;
   font-weight: 500;
+  flex: 1;
+}
+
+.vote-indicator {
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .no-users {
