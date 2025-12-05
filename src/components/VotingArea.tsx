@@ -9,11 +9,10 @@ interface VotingAreaProps {
   activity: Activity | null;
   roomId: string;
   userId: string;
-  isOwner: boolean;
   onVoteReceived?: (userId: string) => void;
 }
 
-function VotingArea({ activity, roomId, userId, isOwner, onVoteReceived }: VotingAreaProps) {
+function VotingArea({ activity, roomId, userId, onVoteReceived }: VotingAreaProps) {
   const [selectedVote, setSelectedVote] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [votedUsers, setVotedUsers] = useState<Set<string>>(new Set());
@@ -52,14 +51,23 @@ function VotingArea({ activity, roomId, userId, isOwner, onVoteReceived }: Votin
   }, [activity?.id]);
 
   const handleVote = (vote: number) => {
-    if (hasVoted || !activity) return;
+    if (!activity) return;
+
+    // Se já votou e está selecionando o mesmo voto, não faz nada
+    if (hasVoted && selectedVote === vote) {
+      return;
+    }
 
     setSelectedVote(vote);
     socketService.vote(roomId, userId, activity.id, vote);
-    setHasVoted(true);
-    setVotedUsers((prev) => new Set([...prev, userId]));
-    if (onVoteReceived) {
-      onVoteReceived(userId);
+    
+    // Marca como votou (mesmo que seja mudança de voto)
+    if (!hasVoted) {
+      setHasVoted(true);
+      setVotedUsers((prev) => new Set([...prev, userId]));
+      if (onVoteReceived) {
+        onVoteReceived(userId);
+      }
     }
   };
 
@@ -72,7 +80,9 @@ function VotingArea({ activity, roomId, userId, isOwner, onVoteReceived }: Votin
           <>
             <h3>{activity.title}</h3>
             {hasVoted && (
-              <span className="vote-confirmation-badge">✅ Você votou!</span>
+              <span className="vote-confirmation-badge">
+                ✅ Você votou! (Clique em outra carta para mudar)
+              </span>
             )}
           </>
         )}
@@ -83,9 +93,9 @@ function VotingArea({ activity, roomId, userId, isOwner, onVoteReceived }: Votin
             key={card}
             className={`vote-card ${
               selectedVote === card ? 'selected' : ''
-            } ${hasVoted ? 'disabled' : ''} ${!isVoting ? 'hidden' : ''}`}
+            } ${!isVoting ? 'hidden' : ''}`}
             onClick={() => handleVote(card)}
-            disabled={hasVoted || !isVoting}
+            disabled={!isVoting}
           >
             {card}
           </button>

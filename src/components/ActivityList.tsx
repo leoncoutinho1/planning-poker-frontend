@@ -5,7 +5,6 @@ import './ActivityList.css';
 interface ActivityListProps {
   activities: Activity[];
   currentActivityId: string | null;
-  isOwner: boolean;
   roomId: string;
   userId: string;
 }
@@ -13,7 +12,6 @@ interface ActivityListProps {
 function ActivityList({
   activities,
   currentActivityId,
-  isOwner,
   roomId,
   userId,
 }: ActivityListProps) {
@@ -35,7 +33,7 @@ function ActivityList({
     return (
       <div className="card">
         <p style={{ textAlign: 'center', color: '#666' }}>
-          Nenhuma atividade ainda. {isOwner && 'Adicione uma atividade para começar!'}
+          Nenhuma atividade ainda. Adicione uma atividade para começar!
         </p>
       </div>
     );
@@ -85,36 +83,34 @@ function ActivityList({
             </div>
           )}
 
-          {isOwner && (
-            <div className="activity-actions">
-              {activity.status === 'pending' && (
-                <button
-                  className="btn btn-success"
-                  onClick={() => handleStartVoting(activity.id)}
-                >
-                  Iniciar Votação
-                </button>
-              )}
+          <div className="activity-actions">
+            {activity.status === 'pending' && (
+              <button
+                className="btn btn-success"
+                onClick={() => handleStartVoting(activity.id)}
+              >
+                Iniciar Votação
+              </button>
+            )}
 
-              {activity.status === 'voting' && (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => handleRevealResults(activity.id)}
-                >
-                  Revelar Resultados
-                </button>
-              )}
+            {activity.status === 'voting' && (
+              <button
+                className="btn btn-primary"
+                onClick={() => handleRevealResults(activity.id)}
+              >
+                Revelar Resultados
+              </button>
+            )}
 
-              {activity.status !== 'voting' && (
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleRemoveActivity(activity.id)}
-                >
-                  Remover
-                </button>
-              )}
-            </div>
-          )}
+            {activity.status !== 'voting' && (
+              <button
+                className="btn btn-danger"
+                onClick={() => handleRemoveActivity(activity.id)}
+              >
+                Remover
+              </button>
+            )}
+          </div>
         </div>
       ))}
     </div>

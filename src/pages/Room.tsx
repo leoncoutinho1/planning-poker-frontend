@@ -289,19 +289,16 @@ function RoomPage() {
           <ActivityList
             activities={room.activities}
             currentActivityId={room.currentActivityId}
-            isOwner={isOwner || false}
             roomId={roomId!}
             userId={userId}
           />
 
-          {isOwner && (
-            <button
-              className="btn btn-primary"
-              onClick={() => setShowCreateModal(true)}
-            >
-              + Adicionar Atividade
-            </button>
-          )}
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            + Adicionar Atividade
+          </button>
         </div>
       </div>
 
@@ -309,7 +306,6 @@ function RoomPage() {
         activity={currentActivity || null}
         roomId={roomId!}
         userId={userId}
-        isOwner={isOwner || false}
         onVoteReceived={(userId) => {
           setVotedUserIds((prev) => new Set([...prev, userId]));
         }}
