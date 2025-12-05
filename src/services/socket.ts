@@ -93,7 +93,8 @@ class SocketService {
   }
 
   // Remover listeners
-  off(event: string, callback?: (...args: unknown[]) => void) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  off(event: string, callback?: (...args: any[]) => void) {
     this.socket?.off(event, callback);
   }
 }
