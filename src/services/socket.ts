@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { RoomState, ResultsRevealedData } from '../types';
+import { RoomState, ResultsRevealedData, Activity } from '../types';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
 
@@ -68,7 +68,7 @@ class SocketService {
     this.socket?.on('activity-created', callback);
   }
 
-  onVotingStarted(callback: (data: { activityId: string; activity: any }) => void) {
+  onVotingStarted(callback: (data: { activityId: string; activity: Activity }) => void) {
     this.socket?.on('voting-started', callback);
   }
 
@@ -93,7 +93,7 @@ class SocketService {
   }
 
   // Remover listeners
-  off(event: string, callback?: (...args: any[]) => void) {
+  off(event: string, callback?: (...args: unknown[]) => void) {
     this.socket?.off(event, callback);
   }
 }

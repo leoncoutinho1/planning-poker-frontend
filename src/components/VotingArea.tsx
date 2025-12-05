@@ -15,7 +15,6 @@ interface VotingAreaProps {
 function VotingArea({ activity, roomId, userId, onVoteReceived }: VotingAreaProps) {
   const [selectedVote, setSelectedVote] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
-  const [votedUsers, setVotedUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!activity) return;
@@ -27,7 +26,6 @@ function VotingArea({ activity, roomId, userId, onVoteReceived }: VotingAreaProp
       hasVoted: boolean;
     }) => {
       if (data.activityId === activity.id) {
-        setVotedUsers((prev) => new Set([...prev, data.userId]));
         if (onVoteReceived) {
           onVoteReceived(data.userId);
         }
@@ -46,9 +44,8 @@ function VotingArea({ activity, roomId, userId, onVoteReceived }: VotingAreaProp
     if (activity && activity.status === 'voting') {
       setSelectedVote(null);
       setHasVoted(false);
-      setVotedUsers(new Set());
     }
-  }, [activity?.id]);
+  }, [activity]);
 
   const handleVote = (vote: number) => {
     if (!activity) return;
@@ -64,7 +61,6 @@ function VotingArea({ activity, roomId, userId, onVoteReceived }: VotingAreaProp
     // Marca como votou (mesmo que seja mudança de voto)
     if (!hasVoted) {
       setHasVoted(true);
-      setVotedUsers((prev) => new Set([...prev, userId]));
       if (onVoteReceived) {
         onVoteReceived(userId);
       }

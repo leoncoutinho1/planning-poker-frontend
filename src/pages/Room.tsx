@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { socketService } from '../services/socket';
 import { roomApi } from '../services/api';
-import { Room, Activity, User } from '../types';
+import { Room, RoomState, Activity, VoteResult } from '../types';
 import ActivityList from '../components/ActivityList';
 import VotingArea from '../components/VotingArea';
 import UserList from '../components/UserList';
@@ -56,8 +56,9 @@ function RoomPage() {
       try {
         const roomData = await roomApi.getRoom(roomId);
         setRoom(roomData);
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Sala não encontrada');
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { error?: string } } };
+        setError(error.response?.data?.error || 'Sala não encontrada');
       } finally {
         setLoading(false);
       }
@@ -73,7 +74,7 @@ function RoomPage() {
     const socket = socketService.connect();
 
     // Configurar listeners
-    const handleRoomState = (data: any) => {
+    const handleRoomState = (data: RoomState) => {
       setRoom({
         id: data.room.id,
         name: data.room.name,
@@ -129,7 +130,7 @@ function RoomPage() {
       });
     };
 
-    const handleVotingStarted = (data: { activityId: string; activity: any }) => {
+    const handleVotingStarted = (data: { activityId: string; activity: Activity }) => {
       setVotedUserIds(new Set()); // Reset votos quando nova votação inicia
       setRoom((prevRoom) => {
         if (!prevRoom) return prevRoom;
@@ -163,7 +164,7 @@ function RoomPage() {
     const handleResultsRevealed = (data: {
       activityId: string;
       result: number;
-      votes: any[];
+      votes: VoteResult[];
     }) => {
       setVotedUserIds(new Set()); // Reset votos quando resultados são revelados
       setRoom((prevRoom) => {
@@ -236,7 +237,6 @@ function RoomPage() {
     };
   }, [roomId, userId, userName]);
 
-  const isOwner = room && userId === room.ownerId;
   const currentActivity = room?.activities.find(
     (a) => a.id === room.currentActivityId
   );
