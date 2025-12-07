@@ -28,8 +28,15 @@ function RoomPage() {
       return;
     }
 
-    const storedUserId = localStorage.getItem(`userId_${roomId}`);
-    const storedUserName = localStorage.getItem(`userName_${roomId}`);
+    // Primeiro verifica se existe userId e userName globais
+    let storedUserId = localStorage.getItem('userId');
+    let storedUserName = localStorage.getItem('userName');
+
+    // Se não existir global, verifica se existe específico da sala
+    if (!storedUserId || !storedUserName) {
+      storedUserId = localStorage.getItem(`userId_${roomId}`);
+      storedUserName = localStorage.getItem(`userName_${roomId}`);
+    }
 
     if (!storedUserId || !storedUserName) {
       const name = prompt('Digite seu nome para entrar na sala:');
@@ -38,11 +45,17 @@ function RoomPage() {
         return;
       }
       const newUserId = crypto.randomUUID();
+      // Salvar globalmente e por sala
+      localStorage.setItem('userId', newUserId);
+      localStorage.setItem('userName', name);
       localStorage.setItem(`userId_${roomId}`, newUserId);
       localStorage.setItem(`userName_${roomId}`, name);
       setUserId(newUserId);
       setUserName(name);
     } else {
+      // Atualizar também o específico da sala para manter consistência
+      localStorage.setItem(`userId_${roomId}`, storedUserId);
+      localStorage.setItem(`userName_${roomId}`, storedUserName);
       setUserId(storedUserId);
       setUserName(storedUserName);
     }
@@ -56,6 +69,27 @@ function RoomPage() {
       try {
         const roomData = await roomApi.getRoom(roomId);
         setRoom(roomData);
+
+        // Adicionar sala à lista do usuário
+        const storedRooms = localStorage.getItem('userRooms');
+        let rooms: Array<{ roomId: string; roomName: string; lastAccessed: number }> = storedRooms ? JSON.parse(storedRooms) : [];
+        
+        // Remover se já existir
+        rooms = rooms.filter(r => r.roomId !== roomId);
+        
+        // Adicionar no início
+        rooms.unshift({
+          roomId,
+          roomName: roomData.name,
+          lastAccessed: Date.now(),
+        });
+
+        // Manter apenas as últimas 20 salas
+        if (rooms.length > 20) {
+          rooms = rooms.slice(0, 20);
+        }
+
+        localStorage.setItem('userRooms', JSON.stringify(rooms));
       } catch (err: unknown) {
         const error = err as { response?: { data?: { error?: string } } };
         setError(error.response?.data?.error || 'Sala não encontrada');

@@ -1,17 +1,69 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { roomApi } from '../services/api';
+import CreateRoomModal from '../components/CreateRoomModal';
 import './Home.css';
 
+interface UserRoom {
+  roomId: string;
+  roomName: string;
+  lastAccessed: number;
+}
+
 function Home() {
-  const [roomName, setRoomName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [userRooms, setUserRooms] = useState<UserRoom[]>([]);
   const navigate = useNavigate();
 
-  const handleCreateRoom = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Carregar userName do localStorage e salas do usuário
+  useEffect(() => {
+    const storedUserName = localStorage.getItem('userName');
+    if (storedUserName) {
+      setOwnerName(storedUserName);
+    }
+
+    // Carregar salas do usuário
+    const storedRooms = localStorage.getItem('userRooms');
+    if (storedRooms) {
+      try {
+        const rooms: UserRoom[] = JSON.parse(storedRooms);
+        // Ordenar por último acesso (mais recente primeiro)
+        rooms.sort((a, b) => b.lastAccessed - a.lastAccessed);
+        setUserRooms(rooms);
+      } catch {
+        // Ignorar erro de parsing
+      }
+    }
+  }, []);
+
+  // Função para adicionar sala à lista do usuário
+  const addUserRoom = (roomId: string, roomName: string) => {
+    const storedRooms = localStorage.getItem('userRooms');
+    let rooms: UserRoom[] = storedRooms ? JSON.parse(storedRooms) : [];
+    
+    // Remover se já existir
+    rooms = rooms.filter(r => r.roomId !== roomId);
+    
+    // Adicionar no início
+    rooms.unshift({
+      roomId,
+      roomName,
+      lastAccessed: Date.now(),
+    });
+
+    // Manter apenas as últimas 20 salas
+    if (rooms.length > 20) {
+      rooms = rooms.slice(0, 20);
+    }
+
+    localStorage.setItem('userRooms', JSON.stringify(rooms));
+    setUserRooms(rooms);
+  };
+
+  const handleCreateRoom = async (roomName: string) => {
     setError('');
     setLoading(true);
 
@@ -27,10 +79,16 @@ function Home() {
         ownerName: ownerName.trim(),
       });
 
-      // Salvar userId no localStorage
+      // Salvar userId e userName globalmente e por sala
+      localStorage.setItem('userId', response.userId);
+      localStorage.setItem('userName', ownerName.trim());
       localStorage.setItem(`userId_${response.roomId}`, response.userId);
       localStorage.setItem(`userName_${response.roomId}`, ownerName.trim());
 
+      // Adicionar sala à lista do usuário
+      addUserRoom(response.roomId, response.roomName);
+
+      setShowCreateModal(false);
       navigate(`/room/${response.roomId}`);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
@@ -40,6 +98,26 @@ function Home() {
     }
   };
 
+  const handleJoinRoom = (roomId: string) => {
+    // Atualizar último acesso
+    const storedRooms = localStorage.getItem('userRooms');
+    if (storedRooms) {
+      try {
+        const rooms: UserRoom[] = JSON.parse(storedRooms);
+        const roomIndex = rooms.findIndex(r => r.roomId === roomId);
+        if (roomIndex !== -1) {
+          rooms[roomIndex].lastAccessed = Date.now();
+          rooms.sort((a, b) => b.lastAccessed - a.lastAccessed);
+          localStorage.setItem('userRooms', JSON.stringify(rooms));
+          setUserRooms(rooms);
+        }
+      } catch {
+        // Ignorar erro
+      }
+    }
+    navigate(`/room/${roomId}`);
+  };
+
   return (
     <div className="home-container">
       <div className="home-content">
@@ -47,41 +125,64 @@ function Home() {
         <p className="subtitle">Estime tarefas de forma colaborativa e eficiente</p>
 
         <div className="card">
-          <h2>Criar Nova Sala</h2>
-          <form onSubmit={handleCreateRoom}>
-            {error && <div className="error-message">{error}</div>}
-            
-            <div className="form-group">
-              <label htmlFor="roomName">Nome da Sala</label>
-              <input
-                id="roomName"
-                type="text"
-                value={roomName}
-                onChange={(e) => setRoomName(e.target.value)}
-                placeholder="Ex: Sprint 1"
-                disabled={loading}
-                required
-              />
-            </div>
+          <h2>Bem-vindo{ownerName ? `, ${ownerName}` : ''}!</h2>
+          
+          <div className="form-group">
+            <label htmlFor="ownerName">Seu Nome</label>
+            <input
+              id="ownerName"
+              type="text"
+              value={ownerName}
+              onChange={(e) => {
+                const newName = e.target.value;
+                setOwnerName(newName);
+                if (newName.trim()) {
+                  localStorage.setItem('userName', newName.trim());
+                }
+              }}
+              placeholder="Ex: João"
+              required
+            />
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="ownerName">Seu Nome</label>
-              <input
-                id="ownerName"
-                type="text"
-                value={ownerName}
-                onChange={(e) => setOwnerName(e.target.value)}
-                placeholder="Ex: João"
-                disabled={loading}
-                required
-              />
-            </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              if (!ownerName.trim()) {
+                setError('Por favor, informe seu nome primeiro');
+                return;
+              }
+              setShowCreateModal(true);
+            }}
+            disabled={loading || !ownerName.trim()}
+          >
+            + Criar Nova Sala
+          </button>
 
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Criando...' : 'Criar Sala'}
-            </button>
-          </form>
+          {error && <div className="error-message" style={{ marginTop: '1rem' }}>{error}</div>}
         </div>
+
+        {userRooms.length > 0 && (
+          <div className="card" style={{ marginTop: '2rem' }}>
+            <h2>Suas Salas</h2>
+            <div className="rooms-list">
+              {userRooms.map((room) => (
+                <div key={room.roomId} className="room-item">
+                  <div className="room-info">
+                    <h3>{room.roomName}</h3>
+                    <span className="room-id">ID: {room.roomId}</span>
+                  </div>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => handleJoinRoom(room.roomId)}
+                  >
+                    Entrar
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="info-card">
           <h3>Como funciona?</h3>
@@ -93,6 +194,17 @@ function Home() {
           </ul>
         </div>
       </div>
+
+      {showCreateModal && (
+        <CreateRoomModal
+          onClose={() => {
+            setShowCreateModal(false);
+            setError('');
+          }}
+          onCreate={handleCreateRoom}
+          userName={ownerName}
+        />
+      )}
     </div>
   );
 }
