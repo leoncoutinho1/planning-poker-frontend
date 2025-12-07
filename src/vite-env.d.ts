@@ -9,5 +9,15 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
+// Declaração global para configuração injetada em runtime
+declare global {
+  interface Window {
+    __APP_CONFIG__?: {
+      apiUrl: string;
+      socketUrl: string;
+    };
+  }
+}
+
 
 

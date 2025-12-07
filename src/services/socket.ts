@@ -1,7 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 import { RoomState, ResultsRevealedData, Activity } from '../types';
+import { config } from '../config';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+const SOCKET_URL = config.socketUrl;
 
 class SocketService {
   private socket: Socket | null = null;
