@@ -1,6 +1,5 @@
 import { io, Socket } from 'socket.io-client';
 import { RoomState, ResultsRevealedData, Activity } from '../types';
-import { config } from '../config';
 
 // Se VITE_SOCKET_URL estiver vazia ou não definida, usa URL relativa (proxy do nginx)
 // Isso permite acesso externo sem precisar configurar localhost:3000

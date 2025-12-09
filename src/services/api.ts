@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { config } from '../config';
 
 // Se VITE_API_URL estiver vazia ou não definida, usa URL relativa (proxy do nginx)
 // Isso permite acesso externo sem precisar configurar localhost:3000
