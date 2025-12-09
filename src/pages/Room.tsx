@@ -7,6 +7,7 @@ import ActivityList from '../components/ActivityList';
 import VotingArea from '../components/VotingArea';
 import UserList from '../components/UserList';
 import CreateActivityModal from '../components/CreateActivityModal';
+import { generateUUID } from '../utils/uuid';
 import './Room.css';
 
 function RoomPage() {
@@ -44,7 +45,7 @@ function RoomPage() {
         navigate('/');
         return;
       }
-      const newUserId = crypto.randomUUID();
+      const newUserId = generateUUID();
       // Salvar globalmente e por sala
       localStorage.setItem('userId', newUserId);
       localStorage.setItem('userName', name);
