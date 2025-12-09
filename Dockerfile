@@ -35,3 +35,4 @@ EXPOSE 80
 
 # Nginx já inicia automaticamente
 CMD ["nginx", "-g", "daemon off;"]
+
